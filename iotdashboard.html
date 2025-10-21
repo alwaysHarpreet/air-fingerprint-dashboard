@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Air Fingerprint Dashboard</title>
+  <style>
+    body { font-family: Arial; text-align: center; }
+    h1 { color: #2c3e50; }
+    .reading { font-size: 24px; margin: 10px; }
+  </style>
+</head>
+<body>
+  <h1>🌿 Air Fingerprint Dashboard 🌿</h1>
+  <div class="reading" id="air">Air Quality: --</div>
+  <div class="reading" id="temp">Temperature: -- °C</div>
+  <div class="reading" id="hum">Humidity: -- %</div>
+  <div class="reading" id="noise">Noise: --</div>
+
+  <script>
+    async function fetchData() {
+      try {
+        const channelId = 3126084; // Your ThingSpeak channel ID
+
+        // Fetch latest data for each field
+        const mqRes = await fetch(`https://api.thingspeak.com/channels/${channelId}/fields/1.json?results=1`);
+        const tempRes = await fetch(`https://api.thingspeak.com/channels/${channelId}/fields/2.json?results=1`);
+        const humRes = await fetch(`https://api.thingspeak.com/channels/${channelId}/fields/3.json?results=1`);
+        const noiseRes = await fetch(`https://api.thingspeak.com/channels/${channelId}/fields/4.json?results=1`);
+
+        const mqData = await mqRes.json();
+        const tempData = await tempRes.json();
+        const humData = await humRes.json();
+        const noiseData = await noiseRes.json();
+
+        // Update HTML
+        const mqValue = mqData.feeds[0].field1;
+        const tempValue = tempData.feeds[0].field2;
+        const humValue = humData.feeds[0].field3;
+        const noiseValue = noiseData.feeds[0].field4;
+
+        let airStatus = "GOOD";
+        if(mqValue > 700) airStatus = "POOR";
+        else if(mqValue > 400) airStatus = "MODERATE";
+
+        document.getElementById("air").innerText = `Air Quality: ${airStatus}`;
+        document.getElementById("temp").innerText = `Temperature: ${tempValue} °C`;
+        document.getElementById("hum").innerText = `Humidity: ${humValue} %`;
+        document.getElementById("noise").innerText = `Noise: ${noiseValue == 1 ? "HIGH" : "LOW"}`;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    fetchData();
+    setInterval(fetchData, 20000); // Refresh every 20 sec
+  </script>
+</body>
+</html>
