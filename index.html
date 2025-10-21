@@ -5,74 +5,119 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Air Fingerprint Dashboard</title>
 <link rel="stylesheet" href="style.css">
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-<h1>🌿 Air Fingerprint Dashboard 🌿</h1>
+<header>
+  <h1>🌿 Air Fingerprint Dashboard</h1>
+</header>
 
-<div class="dashboard">
-  <div class="card">
-    <h2>Air Quality</h2>
+<main class="dashboard">
+
+  <div class="card air-quality">
+    <h2><i class="fas fa-wind"></i> Air Quality</h2>
     <div class="value" id="air">--</div>
   </div>
-  <div class="card">
-    <h2>Temperature (°C)</h2>
-    <div class="value" id="temp">--</div>
+
+  <div class="card temp-card">
+    <h2><i class="fas fa-thermometer-half"></i> Temperature</h2>
+    <div class="value" id="temp">-- °C</div>
+    <canvas id="tempChart" height="100"></canvas>
   </div>
-  <div class="card">
-    <h2>Humidity (%)</h2>
-    <div class="value" id="hum">--</div>
+
+  <div class="card hum-card">
+    <h2><i class="fas fa-tint"></i> Humidity</h2>
+    <div class="value" id="hum">-- %</div>
+    <canvas id="humChart" height="100"></canvas>
   </div>
-  <div class="card">
-    <h2>Noise Level</h2>
+
+  <div class="card noise-card">
+    <h2><i class="fas fa-volume-high"></i> Noise Level</h2>
     <div class="value" id="noise">--</div>
   </div>
-</div>
+
+</main>
 
 <footer>
   &copy; 2025 Air Fingerprint Project
 </footer>
 
 <script>
+// ----- ThingSpeak Setup -----
+const channelId = 3126084;
+
+let tempDataArr = [];
+let humDataArr = [];
+let labelsArr = [];
+
+// Initialize charts
+const tempCtx = document.getElementById('tempChart').getContext('2d');
+const humCtx = document.getElementById('humChart').getContext('2d');
+
+const tempChart = new Chart(tempCtx, {
+  type: 'line',
+  data: { labels: labelsArr, datasets: [{ label: 'Temperature °C', data: tempDataArr, borderColor: 'red', backgroundColor: 'rgba(255,0,0,0.2)', tension: 0.4 }]},
+  options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { display: false } } }
+});
+
+const humChart = new Chart(humCtx, {
+  type: 'line',
+  data: { labels: labelsArr, datasets: [{ label: 'Humidity %', data: humDataArr, borderColor: 'blue', backgroundColor: 'rgba(0,0,255,0.2)', tension: 0.4 }]},
+  options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { display: false } } }
+});
+
+// ----- Fetch Data -----
 async function fetchData() {
   try {
-    const channelId = 3126084; // ThingSpeak Channel ID
-
-    const mqRes = await fetch(`https://api.thingspeak.com/channels/${channelId}/fields/1.json?results=1`);
-    const tempRes = await fetch(`https://api.thingspeak.com/channels/${channelId}/fields/2.json?results=1`);
-    const humRes = await fetch(`https://api.thingspeak.com/channels/${channelId}/fields/3.json?results=1`);
-    const noiseRes = await fetch(`https://api.thingspeak.com/channels/${channelId}/fields/4.json?results=1`);
+    const mqRes = await fetch(`https://api.thingspeak.com/channels/${channelId}/fields/1.json?results=10`);
+    const tempRes = await fetch(`https://api.thingspeak.com/channels/${channelId}/fields/2.json?results=10`);
+    const humRes = await fetch(`https://api.thingspeak.com/channels/${channelId}/fields/3.json?results=10`);
+    const noiseRes = await fetch(`https://api.thingspeak.com/channels/${channelId}/fields/4.json?results=10`);
 
     const mqData = await mqRes.json();
     const tempData = await tempRes.json();
     const humData = await humRes.json();
     const noiseData = await noiseRes.json();
 
+    // Latest values
     const mqValue = mqData.feeds[0].field1;
     const tempValue = tempData.feeds[0].field2;
     const humValue = humData.feeds[0].field3;
     const noiseValue = noiseData.feeds[0].field4;
 
-    // Determine air quality status
+    // Air quality
     let airStatus = "GOOD";
     if (mqValue > 700) airStatus = "POOR";
     else if (mqValue > 400) airStatus = "MODERATE";
 
-    // Update HTML
     document.getElementById("air").innerText = airStatus;
     document.getElementById("air").className = `value ${airStatus}`;
-    document.getElementById("temp").innerText = tempValue || "--";
-    document.getElementById("hum").innerText = humValue || "--";
+    document.getElementById("temp").innerText = tempValue + " °C";
+    document.getElementById("hum").innerText = humValue + " %";
     document.getElementById("noise").innerText = noiseValue == 1 ? "HIGH" : "LOW";
 
-  } catch (err) {
+    // Update charts
+    labelsArr.push(new Date().toLocaleTimeString());
+    tempDataArr.push(tempValue);
+    humDataArr.push(humValue);
+
+    if(labelsArr.length > 10){ labelsArr.shift(); tempDataArr.shift(); humDataArr.shift(); }
+
+    tempChart.update();
+    humChart.update();
+
+  } catch(err) {
     console.error(err);
   }
 }
 
-// Initial fetch and set interval
+// Initial fetch
 fetchData();
 setInterval(fetchData, 20000);
+
 </script>
 
 </body>
