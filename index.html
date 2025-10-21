@@ -1,57 +1,79 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Air Fingerprint Dashboard</title>
-  <style>
-    body { font-family: Arial; text-align: center; }
-    h1 { color: #2c3e50; }
-    .reading { font-size: 24px; margin: 10px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Air Fingerprint Dashboard</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>🌿 Air Fingerprint Dashboard 🌿</h1>
-  <div class="reading" id="air">Air Quality: --</div>
-  <div class="reading" id="temp">Temperature: -- °C</div>
-  <div class="reading" id="hum">Humidity: -- %</div>
-  <div class="reading" id="noise">Noise: --</div>
 
-  <script>
-    async function fetchData() {
-      try {
-        const channelId = 3126084; // Your ThingSpeak channel ID
+<h1>🌿 Air Fingerprint Dashboard 🌿</h1>
 
-        // Fetch latest data for each field
-        const mqRes = await fetch(`https://api.thingspeak.com/channels/${channelId}/fields/1.json?results=1`);
-        const tempRes = await fetch(`https://api.thingspeak.com/channels/${channelId}/fields/2.json?results=1`);
-        const humRes = await fetch(`https://api.thingspeak.com/channels/${channelId}/fields/3.json?results=1`);
-        const noiseRes = await fetch(`https://api.thingspeak.com/channels/${channelId}/fields/4.json?results=1`);
+<div class="dashboard">
+  <div class="card">
+    <h2>Air Quality</h2>
+    <div class="value" id="air">--</div>
+  </div>
+  <div class="card">
+    <h2>Temperature (°C)</h2>
+    <div class="value" id="temp">--</div>
+  </div>
+  <div class="card">
+    <h2>Humidity (%)</h2>
+    <div class="value" id="hum">--</div>
+  </div>
+  <div class="card">
+    <h2>Noise Level</h2>
+    <div class="value" id="noise">--</div>
+  </div>
+</div>
 
-        const mqData = await mqRes.json();
-        const tempData = await tempRes.json();
-        const humData = await humRes.json();
-        const noiseData = await noiseRes.json();
+<footer>
+  &copy; 2025 Air Fingerprint Project
+</footer>
 
-        // Update HTML
-        const mqValue = mqData.feeds[0].field1;
-        const tempValue = tempData.feeds[0].field2;
-        const humValue = humData.feeds[0].field3;
-        const noiseValue = noiseData.feeds[0].field4;
+<script>
+async function fetchData() {
+  try {
+    const channelId = 3126084; // ThingSpeak Channel ID
 
-        let airStatus = "GOOD";
-        if(mqValue > 700) airStatus = "POOR";
-        else if(mqValue > 400) airStatus = "MODERATE";
+    const mqRes = await fetch(`https://api.thingspeak.com/channels/${channelId}/fields/1.json?results=1`);
+    const tempRes = await fetch(`https://api.thingspeak.com/channels/${channelId}/fields/2.json?results=1`);
+    const humRes = await fetch(`https://api.thingspeak.com/channels/${channelId}/fields/3.json?results=1`);
+    const noiseRes = await fetch(`https://api.thingspeak.com/channels/${channelId}/fields/4.json?results=1`);
 
-        document.getElementById("air").innerText = `Air Quality: ${airStatus}`;
-        document.getElementById("temp").innerText = `Temperature: ${tempValue} °C`;
-        document.getElementById("hum").innerText = `Humidity: ${humValue} %`;
-        document.getElementById("noise").innerText = `Noise: ${noiseValue == 1 ? "HIGH" : "LOW"}`;
-      } catch (err) {
-        console.error(err);
-      }
-    }
+    const mqData = await mqRes.json();
+    const tempData = await tempRes.json();
+    const humData = await humRes.json();
+    const noiseData = await noiseRes.json();
 
-    fetchData();
-    setInterval(fetchData, 20000); // Refresh every 20 sec
-  </script>
+    const mqValue = mqData.feeds[0].field1;
+    const tempValue = tempData.feeds[0].field2;
+    const humValue = humData.feeds[0].field3;
+    const noiseValue = noiseData.feeds[0].field4;
+
+    // Determine air quality status
+    let airStatus = "GOOD";
+    if (mqValue > 700) airStatus = "POOR";
+    else if (mqValue > 400) airStatus = "MODERATE";
+
+    // Update HTML
+    document.getElementById("air").innerText = airStatus;
+    document.getElementById("air").className = `value ${airStatus}`;
+    document.getElementById("temp").innerText = tempValue || "--";
+    document.getElementById("hum").innerText = humValue || "--";
+    document.getElementById("noise").innerText = noiseValue == 1 ? "HIGH" : "LOW";
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// Initial fetch and set interval
+fetchData();
+setInterval(fetchData, 20000);
+</script>
+
 </body>
 </html>
