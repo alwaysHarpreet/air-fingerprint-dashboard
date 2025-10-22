@@ -1,75 +1,59 @@
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(to right, #f5f7fa, #c3cfe2);
-  margin: 0;
-  padding: 0;
-  text-align: center;
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial;}
+
+body{
+  background:linear-gradient(135deg,#101820,#004c4c);
+  color:white; text-align:center;
 }
 
-header h1 {
-  padding: 20px 0;
-  color: #2c3e50;
-  text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+header{
+  padding:15px;background:#00897b;
+  font-size:1.2rem;font-weight:bold;
 }
 
-/* ----- Dashboard Grid ----- */
-.dashboard {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin: 20px auto;
-  max-width: 1200px;
-  gap: 20px;
+#statusMsg{font-size:.9rem;color:#ffe600;}
+
+.dashboard{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:20px;padding:20px;
 }
 
-/* ----- Sensor Cards ----- */
-.card {
-  background: #ffffff;
-  border-radius: 15px;
-  width: 250px;
-  padding: 20px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-  transition: transform 0.3s, box-shadow 0.3s;
+.card{
+  background:#1c3030;padding:15px;
+  border-radius:12px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.4);
 }
 
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 25px rgba(0,0,0,0.25);
+.card h2{
+  margin-bottom:10px;
+  font-size:1rem;
+  color:#76e4f7;
 }
 
-.card h2 {
-  font-size: 20px;
-  margin-bottom: 15px;
-  color: #34495e;
+.value{
+  font-size:2rem;
+  font-weight:bold;
 }
 
-.card .value {
-  font-size: 32px;
-  font-weight: bold;
-  margin-bottom: 10px;
-  transition: color 0.3s;
+.value.GOOD{color:#4caf50;}
+.value.MODERATE{color:#ff9800;}
+.value.POOR{color:#f44336;}
+
+.alert-banner{
+  width:100%;padding:10px;
+  font-size:1.3rem;font-weight:bold;
+  display:flex;justify-content:center;gap:10px;
 }
 
-/* ----- Air Quality Colors ----- */
-.GOOD { color: green; }
-.MODERATE { color: orange; }
-.POOR { color: red; }
+.alert-banner.safe{background:#4caf50;}
+.alert-banner.moderate{background:#ff9800;animation:blink 1s infinite;}
+.alert-banner.danger{background:#f44336;animation:blink 0.5s infinite;}
 
-/* ----- Chart Canvas ----- */
-canvas {
-  width: 100% !important;
-  height: 100px !important;
+@keyframes blink{
+  50% {opacity:0;}
 }
 
-/* ----- Footer ----- */
-footer {
-  margin: 30px 0;
-  color: #34495e;
-}
-
-/* ----- Responsive ----- */
-@media screen and (max-width: 768px) {
-  .card {
-    width: 80%;
-  }
+footer{
+  padding:10px; font-size:0.8rem;
+  background:#022f2f; margin-top:15px;
 }
