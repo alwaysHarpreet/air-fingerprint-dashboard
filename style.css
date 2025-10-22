@@ -1,59 +1,323 @@
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial;}
+/* style.css — Professional, responsive UI for Air Fingerprint Dashboard */
 
+/* -------------- Theme / Vars -------------- */
+:root{
+  --bg-900: #071122;
+  --bg-800: #0b1521;
+  --panel: rgba(255,255,255,0.04);
+  --glass: rgba(255,255,255,0.03);
+  --muted: #98a4b3;
+  --text: #e8f0f8;
+  --accent-a: #5eead4;   /* mint */
+  --accent-b: #60a5fa;   /* sky */
+  --warn: #ffb86b;
+  --danger: #ff6b6b;
+  --success: #7ee787;
+  --glass-border: rgba(255,255,255,0.06);
+  --card-radius: 14px;
+  --card-pad: 18px;
+  --page-gap: 22px;
+  --max-width: 1180px;
+  --shadow-soft: 0 10px 30px rgba(2,6,23,0.45);
+  --shadow-strong: 0 22px 60px rgba(2,6,23,0.6);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+/* Respect user's color scheme preference */
+@media (prefers-color-scheme: light){
+  :root{
+    --bg-900: #f6f9fc;
+    --bg-800: #eef5fb;
+    --panel: rgba(2,6,23,0.03);
+    --glass: rgba(0,0,0,0.03);
+    --muted: #546475;
+    --text: #0b1b2b;
+    --glass-border: rgba(2,6,23,0.06);
+    --shadow-soft: 0 8px 24px rgba(11,27,43,0.06);
+    --shadow-strong: 0 18px 44px rgba(11,27,43,0.08);
+  }
+}
+
+/* -------------- Page Layout -------------- */
+*{box-sizing:border-box}
+html,body{height:100%}
 body{
-  background:linear-gradient(135deg,#101820,#004c4c);
-  color:white; text-align:center;
+  margin:0;
+  padding:28px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:var(--page-gap);
+  min-height:100vh;
+  color:var(--text);
+  background:
+    radial-gradient(800px 400px at 10% 8%, rgba(96,165,250,0.06), transparent),
+    linear-gradient(180deg, var(--bg-900), var(--bg-800));
 }
 
+/* Constrain content width */
+.container, header, footer, .alert-banner, main.dashboard{
+  width:100%;
+  max-width:var(--max-width);
+}
+
+/* -------------- Header -------------- */
 header{
-  padding:15px;background:#00897b;
-  font-size:1.2rem;font-weight:bold;
-}
-
-#statusMsg{font-size:.9rem;color:#ffe600;}
-
-.dashboard{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-  gap:20px;padding:20px;
-}
-
-.card{
-  background:#1c3030;padding:15px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:14px 18px;
   border-radius:12px;
-  box-shadow:0 4px 14px rgba(0,0,0,0.4);
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border:1px solid var(--glass-border);
+  box-shadow: var(--shadow-soft);
+}
+header h1{
+  margin:0;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-size:1.12rem;
+  font-weight:700;
+  letter-spacing:0.2px;
+}
+#statusMsg{
+  margin:0;
+  padding:7px 12px;
+  border-radius:999px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.00));
+  color:var(--muted);
+  font-weight:600;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-size:0.92rem;
+  border:1px solid transparent;
+  transition:all .22s ease;
 }
 
-.card h2{
-  margin-bottom:10px;
-  font-size:1rem;
-  color:#76e4f7;
-}
+/* live vs disconnected visual */
+#statusMsg:contains("LIVE"){} /* for reference - JS controls text */
 
-.value{
-  font-size:2rem;
-  font-weight:bold;
-}
-
-.value.GOOD{color:#4caf50;}
-.value.MODERATE{color:#ff9800;}
-.value.POOR{color:#f44336;}
-
+/* -------------- Alert Banner (top) -------------- */
 .alert-banner{
-  width:100%;padding:10px;
-  font-size:1.3rem;font-weight:bold;
-  display:flex;justify-content:center;gap:10px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px 16px;
+  border-radius:12px;
+  font-weight:700;
+  transform-origin:center;
+  transition:transform .25s ease, box-shadow .25s ease;
+  box-shadow: var(--shadow-soft);
+  border:1px solid transparent;
+}
+.alert-banner.hidden{ display:none !important; }
+.alert-banner i{ font-size:1.05rem }
+
+/* variants */
+.alert-banner.safe{
+  background: linear-gradient(90deg, rgba(126,231,135,0.12), rgba(96,165,250,0.02));
+  color:#05341b;
+  border-color: rgba(126,231,135,0.08);
+}
+.alert-banner.moderate{
+  background: linear-gradient(90deg, rgba(255,184,107,0.10), rgba(96,165,250,0.02));
+  color:#4a2b00;
+  border-color: rgba(255,184,107,0.08);
+  transform:translateY(-2px);
+}
+.alert-banner.danger{
+  background: linear-gradient(90deg, rgba(255,107,107,0.12), rgba(96,165,250,0.02));
+  color:#340a0a;
+  border-color: rgba(255,107,107,0.12);
+  animation:alertPulse 1.6s infinite;
+}
+@keyframes alertPulse{
+  0%{ box-shadow: 0 8px 30px rgba(255,107,107,0.03) }
+  50%{ box-shadow: 0 20px 60px rgba(255,107,107,0.08) }
+  100%{ box-shadow: 0 8px 30px rgba(255,107,107,0.03) }
 }
 
-.alert-banner.safe{background:#4caf50;}
-.alert-banner.moderate{background:#ff9800;animation:blink 1s infinite;}
-.alert-banner.danger{background:#f44336;animation:blink 0.5s infinite;}
-
-@keyframes blink{
-  50% {opacity:0;}
+/* -------------- Dashboard Grid -------------- */
+main.dashboard{
+  display:grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap:18px;
+  align-items:start;
 }
 
+/* Card base */
+.card{
+  grid-column: span 4; /* default 3 columns on 12-column grid = 1/3 width */
+  padding:var(--card-pad);
+  border-radius:var(--card-radius);
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border:1px solid var(--glass-border);
+  box-shadow: var(--shadow-soft);
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  position:relative;
+  overflow:hidden;
+  transition:transform .18s ease, box-shadow .18s ease;
+}
+.card:hover{ transform:translateY(-8px); box-shadow: var(--shadow-strong); }
+
+/* Make the first card (Air Quality) larger on wider screens */
+.card:nth-child(1){
+  grid-column: span 6;
+  min-height: 170px;
+}
+
+/* Make the alert card stand out (last card) */
+.card.alert-card{
+  grid-column: span 6;
+  align-self:stretch;
+  display:flex;
+  justify-content:space-between;
+  gap:18px;
+  flex-direction:row;
+  align-items:center;
+}
+.card.alert-card .value{
+  margin-left:auto;
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+  font-size:1.1rem;
+}
+
+/* Card header */
+.card h2{
+  margin:0;
+  font-size:0.95rem;
+  color:var(--muted);
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight:700;
+}
+.card h2 i{ font-size:1.05rem; opacity:0.95 }
+
+/* Metric value */
+.value{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  font-weight:800;
+  font-size:1.5rem;
+  color:var(--accent-b);
+  background:linear-gradient(90deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+  padding:10px 14px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.02);
+  box-shadow: inset 0 -8px 24px rgba(0,0,0,0.12);
+}
+
+/* unit styling (if you put unit inside small tag) */
+.value small{
+  font-weight:700;
+  font-size:0.74rem;
+  color:var(--muted);
+  margin-left:6px;
+  letter-spacing:0.02em;
+}
+
+/* Air quality colored variants (JS applies GOOD/MODERATE/POOR to .value) */
+.value.GOOD{ color:var(--success); background:linear-gradient(90deg, rgba(126,231,135,0.06), rgba(126,231,135,0.02)); border-color: rgba(126,231,135,0.06); box-shadow: none;}
+.value.MODERATE{ color:var(--warn); background:linear-gradient(90deg, rgba(255,184,107,0.06), rgba(255,184,107,0.02)); border-color: rgba(255,184,107,0.06); box-shadow: none;}
+.value.POOR{ color:var(--danger); background:linear-gradient(90deg, rgba(255,107,107,0.06), rgba(255,107,107,0.02)); border-color: rgba(255,107,107,0.06); box-shadow: none; }
+
+/* Decorative micro-chart area (canvas) */
+.card canvas{
+  width:100% !important;
+  height:82px !important;
+  border-radius:8px;
+  margin-top:6px;
+  background:transparent;
+}
+
+/* Add a subtle decorative gradient edge to large card (Air) */
+.card:nth-child(1)::before{
+  content:"";
+  position:absolute;
+  right:-40px;
+  top:-40px;
+  width:220px;
+  height:220px;
+  background: radial-gradient(circle at 30% 30%, rgba(96,165,250,0.06), transparent 30%);
+  filter: blur(28px);
+  pointer-events:none;
+}
+
+/* Small detail row under headers for timestamp / small metrics (if you add later) */
+.card .meta-row{ display:flex; gap:10px; align-items:center; color:var(--muted); font-size:0.88rem; }
+
+/* -------------- Footer -------------- */
 footer{
-  padding:10px; font-size:0.8rem;
-  background:#022f2f; margin-top:15px;
+  padding:12px 16px;
+  border-radius:10px;
+  color:var(--muted);
+  font-size:0.9rem;
+  display:flex;
+  justify-content:center;
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+  border:1px solid transparent;
 }
+
+/* -------------- Small utilities / icon badges -------------- */
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 10px;
+  border-radius:999px;
+  font-weight:700;
+  font-size:0.86rem;
+  color:var(--text);
+  background: linear-gradient(90deg, var(--accent-a), var(--accent-b));
+  box-shadow: 0 6px 20px rgba(96,165,250,0.08);
+}
+
+/* -------------- Responsiveness -------------- */
+@media (max-width:1100px){
+  .card:nth-child(1){ grid-column: span 8; }
+  .card.alert-card{ grid-column: span 4; flex-direction:column; align-items:flex-start; gap:10px; }
+}
+
+@media (max-width:880px){
+  header{flex-direction:column; align-items:flex-start; gap:10px}
+  .card{ grid-column: span 6; }
+  .card.alert-card{ grid-column: span 6; flex-direction:row; align-items:center; }
+  body{ padding:18px; gap:16px; }
+}
+
+@media (max-width:520px){
+  main.dashboard{ grid-template-columns: repeat(6, 1fr); gap:12px; }
+  .card{ grid-column: span 6; padding:14px; border-radius:12px; }
+  .card:nth-child(1){ min-height:140px; }
+  .card.alert-card{ flex-direction:column; align-items:flex-start; gap:8px; }
+  .value{ font-size:1.15rem; padding:8px 10px; }
+  .card canvas{ height:64px !important; }
+  header h1{ font-size:1rem; }
+}
+
+/* -------------- Accessibility & Reduced motion -------------- */
+@media (prefers-reduced-motion: reduce){
+  *{ transition:none !important; animation:none !important; }
+}
+
+/* -------------- Focus outlines -------------- */
+.card:focus-within{ outline: 3px solid rgba(96,165,250,0.14); outline-offset:4px; border-color: rgba(96,165,250,0.08); }
+
+/* -------------- Helpful comment for implementers --------------
+- The grid uses a 12-column layout. Cards default to span 4 columns (1/3).
+- First card spans more columns to create a strong visual hierarchy.
+- JS adds GOOD/MODERATE/POOR classes to the .value element — those are styled above.
+- .alert-banner expects classes 'safe', 'moderate', 'danger' from JS.
+- Chart canvases are responsive; Chart.js will redraw automatically.
+- Keep animations subtle for professionalism; reduced-motion is respected.
+--------------------------------------------------------------- */
